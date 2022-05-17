@@ -125,3 +125,106 @@ exports.getVerfication = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.postlogin = async (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  try {
+    const user = await User.findOne({
+      $or: [{ email: email }, { username: email }],
+    });
+
+    const storedPasswored = user.password;
+    const doMatch = await bcrypt.compare(password, storedPasswored);
+    if (!doMatch) {
+      const error = new Error("Password incorrect!");
+      error.statusCode = 401;
+      throw error;
+    }
+
+    const token = jwt.sign(
+      {
+        email: user.email,
+        userId: user._id.toString(),
+      },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: process.env.JWT_TOKEN_TIMEOUT + "h" }
+    );
+
+    const refreshToken = jwt.sign(
+      { email: user.email, userId: user._id.toString() },
+      process.env.JWT_REFRESH_SECRET_KEY,
+      { expiresIn: process.env.JWT_REFRESH_TOKEN_TIMEOUT + "h" }
+    );
+
+    tokenList[refreshToken] = {
+      email: user.email,
+      userId: user._id.toString(),
+      token: token,
+    };
+
+    res
+      .status(200)
+      .cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+      })
+      .cookie("refreshTokenTimeout", process.env.JWT_REFRESH_TOKEN_TIMEOUT, {
+        httpOnly: true,
+      })
+      .json({
+        message: "Logged In!",
+        userId: user._id,
+        username: user.username,
+        fisrtName: user.firstName,
+        lastName: user.lastName,
+        avatar: user.avatar,
+        token: token,
+        tokenTimeout: process.env.JWT_TOKEN_TIMEOUT,
+      });
+
+    console.log("A user just logged in.");
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.refreshToken = async (req, res, next) => {
+  const authorization = req.get("Authorization");
+
+  try {
+    const refreshToken = authorization.split(" ")[1];
+
+    if (refreshToken && refreshToken in tokenList) {
+      const email = tokenList[refreshToken].email;
+      const userId = tokenList[refreshToken].userId;
+
+      const newToken = jwt.sign(
+        {
+          email: email,
+          userId: userId,
+        },
+        process.env.JWT_SECRET_KEY,
+        { expiresIn: process.env.JWT_TOKEN_TIMEOUT + "h" }
+      );
+
+      tokenList[refreshToken].token = newToken;
+      res.status(200).json({
+        token: newToken,
+        tokenTimeout: process.env.JWT_TOKEN_TIMEOUT,
+      });
+    } else {
+      res.status(404).json({
+        message: "Invalid request",
+      });
+    }
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};

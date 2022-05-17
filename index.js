@@ -1,6 +1,8 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const dbClient = require("./middlewares/common/database");
+const cookieParser = require("cookie-parser");
+
 const app = express();
 dotenv.config();
 
@@ -11,6 +13,9 @@ dbClient;
 // Request Parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Cookie Parser
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 // ECOMMERCE ROUTES
 app.use("/ecom/api/auth", authRoutes);
