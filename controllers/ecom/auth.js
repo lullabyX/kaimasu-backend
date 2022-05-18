@@ -134,6 +134,9 @@ exports.postlogin = async (req, res, next) => {
     const user = await User.findOne({
       $or: [{ email: email }, { username: email }],
     });
+    let hasBankDetails = false;
+    if (user.bankAccountNo && user.bankAccountName && user.bankAccountToken)
+      hasBankDetails = true;
 
     const storedPasswored = user.password;
     const doMatch = await bcrypt.compare(password, storedPasswored);
@@ -179,6 +182,7 @@ exports.postlogin = async (req, res, next) => {
         fisrtName: user.firstName,
         lastName: user.lastName,
         avatar: user.avatar,
+        hasBankDetails: hasBankDetails,
         token: token,
         tokenTimeout: process.env.JWT_TOKEN_TIMEOUT,
       });
