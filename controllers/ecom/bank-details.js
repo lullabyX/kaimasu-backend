@@ -1,6 +1,5 @@
 const { default: axios } = require("axios");
 const createHttpError = require("http-errors");
-const { MasterDetailsResponseBillingInfoAddress } = require("sib-api-v3-sdk");
 const User = require("../../models/ecom/Users");
 
 exports.postBankInfo = async (req, res, next) => {
