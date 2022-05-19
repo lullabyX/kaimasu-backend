@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { postCart, getCart } = require("../../controllers/ecom/shop");
+const { postCart, getCart, checkout } = require("../../controllers/ecom/shop");
 const isAuth = require("../../middlewares/auth/isAuth");
 
 const router = Router();
@@ -8,5 +8,7 @@ const router = Router();
 router.post("/update-cart", isAuth, postCart);
 // GET -> /ecom/api/shop/cart
 router.get("/cart", isAuth, getCart);
+// POST -> /ecom/api/shop/checkout
+router.put("/checkout", isAuth, checkout);
 
 module.exports = router;

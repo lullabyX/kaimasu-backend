@@ -4,7 +4,6 @@ const userSchema = mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
     },
     bankAccountNo: {
       type: String,
