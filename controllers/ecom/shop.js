@@ -1,8 +1,11 @@
 const createHttpError = require("http-errors");
 const { default: mongoose } = require("mongoose");
+const axios = require("axios");
 const Cart = require("../../models/ecom/Cart");
 const User = require("../../models/ecom/Users");
 const Order = require("../../models/ecom/Order");
+
+require("dotenv").config();
 
 exports.getCart = async (req, res, next) => {
   try {
@@ -91,13 +94,33 @@ exports.checkout = async (req, res, next) => {
       return next(createHttpError(500, "Cart not found or empty"));
     }
 
-    //successfull api call to bank
+    const response = await axios.put(
+      process.env.BANKAPIENDPOINT + "/transaction",
+      {
+        from: {
+          bankAccountNo: user.bankAccountNo,
+          bankAccountName: user.bankAccountName,
+          bankAccountToken: user.bankAccountToken,
+        },
+        to: {
+          bankAccountNo: process.env.BANKACCOUNTNO,
+          bankAccountName: process.env.BANKACCOUNTNAME,
+          bankAccountToken: process.env.BANKACCOUNTTOKEN,
+        },
+        products: cart.products,
+      }
+    );
+    if (response.status !== 201) {
+      return next(createHttpError(500, "Transaction failed"));
+    }
+
     fullName = address.FullName || `${user.firstName} ${user.lastName}`;
     const order = new Order({
       userId: user._id,
       products: cart.products,
       totalItems: cart.totalItems,
-      totalPaid: 0,
+      totalPaid: response.data.totalAmount,
+      transactionId: response.data.transactionId,
       Address: {
         FullName: fullName,
         Region: address.Region,

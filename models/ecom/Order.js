@@ -30,6 +30,7 @@ const cartSchema = mongoose.Schema(
       Address: { type: String },
       PhoneNumber: { type: String },
     },
+    transactionId: { type: mongoose.Types.ObjectId },
   },
   {
     timestamps: true,
