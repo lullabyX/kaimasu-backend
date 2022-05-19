@@ -31,6 +31,7 @@ const cartSchema = mongoose.Schema(
       PhoneNumber: { type: String },
     },
     transactionId: { type: mongoose.Types.ObjectId },
+    status: { type: String, default: "On-Route" },
   },
   {
     timestamps: true,

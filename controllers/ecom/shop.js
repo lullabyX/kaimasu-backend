@@ -195,3 +195,31 @@ exports.checkout = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.confirmDeliver = async (req, res, next) => {
+  const transactionId = req.body.transactionId;
+  try {
+    const supplierOrder = await SupplierOrderEcom.findOne({
+      transactionId: transactionId,
+    });
+    if (!supplierOrder) {
+      return next(
+        createHttpError(500, "Order to supplier not found with transactionId")
+      );
+    }
+    const order = await Order.findById(supplierOrder.userOrderId);
+    if (!order) {
+      return next(createHttpError(500, "User order not found"));
+    }
+    order.status = "Delivered";
+    await order.save();
+    res.status(201).json({
+      message: "Order delivered",
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};

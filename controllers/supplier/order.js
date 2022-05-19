@@ -27,6 +27,12 @@ exports.putOrder = async (req, res, next) => {
       order: order,
     });
     //supply order -> call ecom
+    const orderConfirmResponse = await axios.post(
+      process.env.ECOMAPIENDPOINT + "/shop/order",
+      {
+        transactionId: order.transactionId,
+      }
+    );
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
