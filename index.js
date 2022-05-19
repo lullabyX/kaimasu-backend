@@ -15,6 +15,9 @@ const ecomShopRoutes = require("./routes/ecom/shop");
 const bankUserRoutes = require("./routes/bank/bankUser");
 const bankTransactionRoutes = require("./routes/bank/transactions");
 
+// SUPPLIER
+const supplierOrderRoutes = require("./routes/supplier/order");
+
 const {
   notFoundHandler,
   errorHandler,
@@ -37,6 +40,9 @@ app.use("/ecom/api/shop", ecomShopRoutes);
 // BANK ROUTES
 app.use("/bank/api/user", bankUserRoutes);
 app.use("/bank/api/transaction", bankTransactionRoutes);
+
+// SUPPLIER ROUTES
+app.use("/supplier/api/order", supplierOrderRoutes);
 
 // Error Handleing
 app.use(notFoundHandler);
