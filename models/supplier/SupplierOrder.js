@@ -11,6 +11,7 @@ const orderSchema = mongoose.Schema(
         price: { type: Number },
       },
     ],
+    totalAmount: { type: Number },
     transactionId: { type: mongoose.Types.ObjectId },
   },
   {

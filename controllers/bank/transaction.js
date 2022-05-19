@@ -35,6 +35,9 @@ exports.putTransaction = async (req, res, next) => {
       totalAmount: totalAmount,
     });
 
+    if (from.balance < totalAmount) {
+      return next(createHttpError(500, "Not sufficient balance"));
+    }
     from.balance -= totalAmount;
     to.balance += totalAmount;
 

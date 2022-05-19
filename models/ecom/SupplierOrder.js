@@ -12,6 +12,7 @@ const orderSchema = mongoose.Schema(
         price: { type: Number },
       },
     ],
+    totalPaid: { type: Number },
     transactionId: { type: mongoose.Types.ObjectId },
   },
   {
@@ -19,6 +20,6 @@ const orderSchema = mongoose.Schema(
   }
 );
 
-const SupplierOrder = mongoose.model("SupplierOrder", orderSchema);
+const SupplierOrderEcom = mongoose.model("SupplierOrderEcom", orderSchema);
 
-module.exports = SupplierOrder;
+module.exports = SupplierOrderEcom;

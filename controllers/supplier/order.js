@@ -1,13 +1,24 @@
+const createHttpError = require("http-errors");
 const SupplierOrder = require("../../models/supplier/SupplierOrder");
+const axios = require("axios");
+require("dotenv").config();
 
 exports.putOrder = async (req, res, next) => {
-  const products = req.body.products;
   const transactionId = req.body.transactionId;
   try {
     // confirm from bank
-
+    const response = await axios.get(
+      process.env.BANKAPIENDPOINT + "/transaction/" + transactionId
+    );
+    if (response.status !== 200) {
+      return next(
+        createHttpError(500, "Transaction not found with give transactionId")
+      );
+    }
+    // create order
     const order = new SupplierOrder({
-      products: products,
+      products: response.data.transaction.products,
+      totalAmount: response.data.transaction.totalAmount,
       transactionId: transactionId,
     });
     await order.save();
