@@ -9,6 +9,7 @@ dotenv.config();
 // ECOM
 const ecomAuthRoutes = require("./routes/ecom/auth");
 const ecomBankRoutes = require("./routes/ecom/bank-details");
+const ecomShopRoutes = require("./routes/ecom/shop");
 
 // BANK
 const bankUserRoutes = require("./routes/bank/BankUser");
@@ -30,6 +31,7 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 // ECOMMERCE ROUTES
 app.use("/ecom/api/auth", ecomAuthRoutes);
 app.use("/ecom/api/bank-details", ecomBankRoutes);
+app.use("/ecom/api/shop", ecomShopRoutes);
 
 // BANK ROUTES
 app.use("/bank/api/user", bankUserRoutes);
