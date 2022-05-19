@@ -35,6 +35,9 @@ exports.putTransaction = async (req, res, next) => {
       totalAmount: totalAmount,
     });
 
+    if (from.balance < totalAmount) {
+      return next(createHttpError(500, "Not sufficient balance"));
+    }
     from.balance -= totalAmount;
     to.balance += totalAmount;
 
@@ -49,6 +52,25 @@ exports.putTransaction = async (req, res, next) => {
       from: from.bankAccountName,
       to: to.bankAccountName,
       transactionId: transaction._id,
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.getTransaction = async (req, res, next) => {
+  const transactionId = req.params.transactionId;
+  try {
+    const transaction = await Transaction.findById(transactionId);
+    if (!transaction) {
+      return next(createHttpError(500, "Transaction not found"));
+    }
+    res.status(200).json({
+      message: "Transaction fetch successfull",
+      transaction: transaction,
     });
   } catch (err) {
     if (!err.statusCode) {

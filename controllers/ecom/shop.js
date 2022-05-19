@@ -4,6 +4,7 @@ const axios = require("axios");
 const Cart = require("../../models/ecom/Cart");
 const User = require("../../models/ecom/Users");
 const Order = require("../../models/ecom/Order");
+const SupplierOrderEcom = require("../../models/ecom/SupplierOrder");
 
 require("dotenv").config();
 
@@ -132,9 +133,88 @@ exports.checkout = async (req, res, next) => {
     });
     await order.save();
     await cart.remove();
+
     res.status(201).json({
       message: "Your order is placed",
       order: order,
+    });
+
+    // call bank api to pay supplier
+    const products = order.products.map((product) => {
+      return {
+        ...product._doc,
+        price: product.price * process.env.SUPPLIERCUT,
+      };
+    });
+    const bankResSupplier = await axios.put(
+      process.env.BANKAPIENDPOINT + "/transaction",
+      {
+        to: {
+          bankAccountNo: process.env.SUPPLIERBANKACCOUNTNO,
+          bankAccountName: process.env.SUPPLIERBANKACCOUNTNAME,
+          bankAccountToken: process.env.SUPPLIERBANKACCOUNTTOKEN,
+        },
+        from: {
+          bankAccountNo: process.env.BANKACCOUNTNO,
+          bankAccountName: process.env.BANKACCOUNTNAME,
+          bankAccountToken: process.env.BANKACCOUNTTOKEN,
+        },
+        products: products,
+      }
+    );
+
+    if (bankResSupplier.status !== 201) {
+      return next(
+        createHttpError(500, "Transaction failed while paying supplier")
+      );
+    }
+
+    const supplierOrder = new SupplierOrderEcom({
+      userOrderId: order._id,
+      products: products,
+      totalPaid: bankResSupplier.data.totalAmount,
+      transactionId: bankResSupplier.data.transactionId,
+    });
+
+    await supplierOrder.save();
+
+    const supplierResponse = await axios.put(
+      process.env.SUPPLIERAPIENDPOINT + "/order",
+      {
+        transactionId: supplierOrder.transactionId,
+      }
+    );
+
+    if (supplierResponse.status !== 201) {
+      next(createHttpError(500, "Failed placing order at supplier"));
+    }
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.confirmDeliver = async (req, res, next) => {
+  const transactionId = req.body.transactionId;
+  try {
+    const supplierOrder = await SupplierOrderEcom.findOne({
+      transactionId: transactionId,
+    });
+    if (!supplierOrder) {
+      return next(
+        createHttpError(500, "Order to supplier not found with transactionId")
+      );
+    }
+    const order = await Order.findById(supplierOrder.userOrderId);
+    if (!order) {
+      return next(createHttpError(500, "User order not found"));
+    }
+    order.status = "Delivered";
+    await order.save();
+    res.status(201).json({
+      message: "Order delivered",
     });
   } catch (err) {
     if (!err.statusCode) {
