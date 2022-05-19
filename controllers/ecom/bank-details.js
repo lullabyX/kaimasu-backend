@@ -1,4 +1,6 @@
+const { default: axios } = require("axios");
 const createHttpError = require("http-errors");
+const { MasterDetailsResponseBillingInfoAddress } = require("sib-api-v3-sdk");
 const User = require("../../models/ecom/Users");
 
 exports.postBankInfo = async (req, res, next) => {
@@ -16,8 +18,24 @@ exports.postBankInfo = async (req, res, next) => {
 
     await user.save();
 
+    const response = await axios.post(
+      "http://localhost:8080/bank/api/user/update-user",
+      {
+        userId: req.userId,
+        bankAccountNo: bankAccountNo,
+        bankAccountName: bankAccountName,
+        bankAccountToken: bankAccountToken,
+      }
+    );
+    if (response.status !== 201) {
+      next(createHttpError(500, "Somethign went wrong calling bank API"));
+    }
     res.status(200).json({
       message: "Bank information updated",
+      bankResponse: {
+        status: response.status,
+        data: response.data,
+      },
       userId: req.userId,
       bankAccountNo: bankAccountNo,
       bankAccountName: bankAccountName,
