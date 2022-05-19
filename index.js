@@ -6,8 +6,12 @@ const cookieParser = require("cookie-parser");
 const app = express();
 dotenv.config();
 
-const authRoutes = require("./routes/ecom/auth");
-const bankRoutes = require("./routes/ecom/bank-details");
+// ECOM
+const ecomAuthRoutes = require("./routes/ecom/auth");
+const ecomBankRoutes = require("./routes/ecom/bank-details");
+
+// BANK
+const bankUserRoutes = require("./routes/bank/BankUser");
 
 const {
   notFoundHandler,
@@ -24,8 +28,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 // ECOMMERCE ROUTES
-app.use("/ecom/api/auth", authRoutes);
-app.use("/ecom/api/bank-details", bankRoutes);
+app.use("/ecom/api/auth", ecomAuthRoutes);
+app.use("/ecom/api/bank-details", ecomBankRoutes);
+
+// BANK ROUTES
+app.use("/bank/api/user", bankUserRoutes);
 
 // Error Handleing
 app.use(notFoundHandler);
