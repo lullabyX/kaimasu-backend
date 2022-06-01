@@ -2,7 +2,7 @@ const { Router } = require("express");
 const {
   putTransaction,
   getTransaction,
-} = require("../../controllers/bank/Transaction");
+} = require("../../controllers/bank/transaction");
 
 const router = Router();
 
