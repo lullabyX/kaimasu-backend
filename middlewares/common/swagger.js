@@ -11,7 +11,22 @@ const options = {
         url: "http://localhost:8080",
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   },
+
   apis: ["./routes/ecom/*.js"],
 };
 module.exports = options;
