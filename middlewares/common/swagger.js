@@ -27,6 +27,6 @@ const options = {
     ],
   },
 
-  apis: ["./routes/ecom/*.js"],
+  apis: ["./routes/ecom/*.js", "./routes/supplier/*.js", "./routes/bank/*.js"],
 };
 module.exports = options;

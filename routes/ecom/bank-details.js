@@ -12,15 +12,15 @@ const router = Router();
  *       required:
  *         - bankAccountNo
  *         - bankAccountName
- *         - bankAccountToken 
+ *         - bankAccountToken
  *       properties:
- *         bankAccountNo: 
+ *         bankAccountNo:
  *          type: string
  *          description: bank Account Number
  *         bankAccountName:
  *           type: string
  *           description: Account holder Name
- *         bankAccountToken: 
+ *         bankAccountToken:
  *          type: string
  *          description: bank password
  *       example:
@@ -33,7 +33,7 @@ const router = Router();
  * @swagger
  * tags:
  *   name: BankAccounts
- *   description: Customers
+ *   description: Bank account holder
  */
 
 /**
