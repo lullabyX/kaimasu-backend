@@ -1,8 +1,8 @@
 const { Router } = require("express");
-const { postBankInfo } = require("../../controllers/ecom/bank-details");
-const isAuth = require("../../middlewares/auth/isAuth");
+const { postUserDetail } = require("../../controllers/bank/BankUser");
 
 const router = Router();
+
 /**
  * @swagger
  * components:
@@ -38,7 +38,7 @@ const router = Router();
 
 /**
  * @swagger
- * /ecom/api/bank-details:
+ * /bank/api/user/update-user:
  *   post:
  *     summary: Add bank details
  *     tags: [BankAccounts]
@@ -58,6 +58,7 @@ const router = Router();
  *       500:
  *         description: Some server error
  */
-router.post("/", isAuth, postBankInfo);
+// POST -> /bank/api/user/update-user
+router.post("/update-user", postUserDetail);
 
 module.exports = router;

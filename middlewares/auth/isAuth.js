@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
   const authorization = req.get("Authorization");
+  console.log({authorization});
   if (!authorization) {
     const error = new Error("No token found.");
     error.statusCode = 401;
