@@ -44,16 +44,17 @@ exports.postCart = async (req, res, next) => {
       cart = new Cart({ userId: user._id });
     }
     const products = cart.products;
+    // console.log(products);
     cart.totalItems += +productQuantity;
 
     let product = products.filter(
-      (product) => product.productId === productId
+      (product) => product.productId == productId
     )[0];
     if (product) {
       const oldQty = product.quantity;
       productQuantity = +productQuantity + oldQty;
     }
-    product = {
+    updateProduct = {
       productId: productId,
       price: productPrice,
       image: productImage,
@@ -62,12 +63,12 @@ exports.postCart = async (req, res, next) => {
     };
 
     const indx = products.findIndex(
-      (product) => product.productId === productId
+      (product) => product.productId == productId
     );
     if (indx >= 0) {
-      cart.products[indx] = product;
+      cart.products[indx] = updateProduct;
     } else {
-      cart.products.push(product);
+      cart.products.push(updateProduct);
     }
     await cart.save();
     res.status(202).json({
