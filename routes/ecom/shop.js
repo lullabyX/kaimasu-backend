@@ -4,6 +4,7 @@ const {
   getCart,
   checkout,
   confirmDeliver,
+  getProducts,
 } = require("../../controllers/ecom/shop");
 const isAuth = require("../../middlewares/auth/isAuth");
 
@@ -144,5 +145,24 @@ router.put("/checkout", isAuth, checkout);
  */
 // POST -> /ecom/api/shop/order
 router.post("/order", confirmDeliver);
+
+/**
+ * @swagger
+ * /ecom/api/shop/products:
+ *   get:
+ *     summary: Returns the list of all the books
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: Get Products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
+ */
+// GET -> /ecom/api/shop/products
+router.get("/products", getProducts);
 
 module.exports = router;

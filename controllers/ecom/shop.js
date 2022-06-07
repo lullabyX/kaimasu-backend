@@ -224,3 +224,37 @@ exports.confirmDeliver = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getProducts = async (req, res, next) => {
+  const products = [
+    {
+      id: 1,
+      image: "tea_pot",
+      name: "Tea Pot",
+      price: 50,
+    },
+    {
+      id: 2,
+      image: "mug",
+      name: "Mug",
+      price: 20,
+    },
+    {
+      id: 3,
+      image: "water_bottle",
+      name: "Water Bottle",
+      price: 30,
+    },
+  ];
+
+  try {
+    res.status(200).json({
+      products: products,
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
