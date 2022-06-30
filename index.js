@@ -2,9 +2,13 @@ const express = require("express");
 const dotenv = require("dotenv");
 const dbClient = require("./middlewares/common/database");
 const cookieParser = require("cookie-parser");
+const swaggerUI = require("swagger-ui-express");
+const swaggerJsDoc = require("swagger-jsdoc");
+const cors = require("cors");
 
 const app = express();
 dotenv.config();
+app.use(cors());
 
 // ECOM
 const ecomAuthRoutes = require("./routes/ecom/auth");
@@ -17,6 +21,12 @@ const bankTransactionRoutes = require("./routes/bank/transactions");
 
 // SUPPLIER
 const supplierOrderRoutes = require("./routes/supplier/order");
+
+// SWAGGER
+const swaggerOptions = require("./middlewares/common/swagger")
+const specs = swaggerJsDoc(swaggerOptions);
+app.use("/docs", swaggerUI.serve, swaggerUI.setup(specs));
+
 
 const {
   notFoundHandler,

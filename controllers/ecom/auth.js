@@ -222,7 +222,7 @@ exports.refreshToken = async (req, res, next) => {
       });
     } else {
       res.status(404).json({
-        message: "Invalid request",
+        message: "Invalid Request",
       });
     }
   } catch (err) {
