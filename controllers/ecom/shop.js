@@ -8,6 +8,33 @@ const SupplierOrderEcom = require("../../models/ecom/SupplierOrder");
 
 require("dotenv").config();
 
+let products = [
+  {
+    id: 1,
+    image:
+      "https://res.cloudinary.com/dxaiffb1m/image/upload/v1656585653/Taza-creativa-de-cer-mica-Simple-de-gran-capacidad-para-parejas-de-estilo-japon-s-taza_ou5uwi.jpg",
+    name: "Coffee Mug",
+    quantity: 30,
+    price: 50,
+  },
+  {
+    id: 2,
+    image:
+      "https://res.cloudinary.com/dxaiffb1m/image/upload/v1656586131/5950b2c6186770978ab0607bd33a5c10_jvhm0o.jpg",
+    name: "Tea Cup",
+    quantity: 40,
+    price: 20,
+  },
+  {
+    id: 3,
+    image:
+      "https://res.cloudinary.com/dxaiffb1m/image/upload/v1656586180/81lMl0KeaXL._AC_SL1500__terpfi.jpg",
+    name: "Water Bottle",
+    quantity: 50,
+    price: 30,
+  },
+];
+
 exports.getCart = async (req, res, next) => {
   try {
     const cart = await Cart.findOne({
@@ -28,9 +55,6 @@ exports.getCart = async (req, res, next) => {
 
 exports.postCart = async (req, res, next) => {
   const productId = req.body.productId || "";
-  const productName = req.body.productName || "";
-  const productPrice = req.body.productPrice || "";
-  const productImage = req.body.productImage || "";
   let productQuantity = req.body.productQuantity || 1;
   try {
     let cart = await Cart.findOne({
@@ -43,31 +67,44 @@ exports.postCart = async (req, res, next) => {
       }
       cart = new Cart({ userId: user._id });
     }
-    const products = cart.products;
+    const cartProducts = cart.products;
+    // console.log(products);
     cart.totalItems += +productQuantity;
 
-    let product = products.filter(
-      (product) => product.productId === productId
+    let cartProduct = cartProducts.filter(
+      (cartProduct) => cartProduct.productId == productId
     )[0];
-    if (product) {
-      const oldQty = product.quantity;
+    if (cartProduct) {
+      const oldQty = cartProduct?.quantity;
       productQuantity = +productQuantity + oldQty;
     }
-    product = {
+
+    const product = products.filter((product) => product.id == productId)[0];
+    if (!product) {
+      const error = new Error("Product not found in product list");
+      throw error;
+    }
+
+    if (product?.quantity < productQuantity) {
+      return res.status(401).json({
+        message: "Product is not in enough quantity to be added to cart.",
+      });
+    }
+    updateProduct = {
       productId: productId,
-      price: productPrice,
-      image: productImage,
-      name: productName,
+      price: product.price,
+      image: product.image,
+      name: product.name,
       quantity: productQuantity,
     };
 
-    const indx = products.findIndex(
-      (product) => product.productId === productId
+    const indx = cartProducts.findIndex(
+      (product) => product.productId == productId
     );
     if (indx >= 0) {
-      cart.products[indx] = product;
+      cart.products[indx] = updateProduct;
     } else {
-      cart.products.push(product);
+      cart.products.push(updateProduct);
     }
     await cart.save();
     res.status(202).json({
@@ -140,7 +177,7 @@ exports.checkout = async (req, res, next) => {
     });
 
     // call bank api to pay supplier
-    const products = order.products.map((product) => {
+    const orderProducts = order.products.map((product) => {
       return {
         ...product._doc,
         price: product.price * process.env.SUPPLIERCUT,
@@ -159,21 +196,34 @@ exports.checkout = async (req, res, next) => {
           bankAccountName: process.env.BANKACCOUNTNAME,
           bankAccountToken: process.env.BANKACCOUNTTOKEN,
         },
-        products: products,
+        products: orderProducts,
       }
     );
 
     if (bankResSupplier.status !== 201) {
-      return next(
-        createHttpError(500, "Transaction failed while paying supplier")
-      );
+      // return next(
+      //   createHttpError(500, "Transaction failed while paying supplier")
+      // );
+      console.log("Transaction failed while paying supplier");
     }
 
     const supplierOrder = new SupplierOrderEcom({
       userOrderId: order._id,
-      products: products,
+      products: orderProducts,
       totalPaid: bankResSupplier.data.totalAmount,
       transactionId: bankResSupplier.data.transactionId,
+    });
+
+    products = products.map((product) => {
+      const orderProduct = orderProducts.filter(
+        (orderProduct) => orderProduct.productId == product.id
+      )[0];
+      let newQty = product.quantity;
+      if (orderProduct) newQty -= orderProduct.quantity;
+      return {
+        ...product,
+        quantity: newQty,
+      };
     });
 
     await supplierOrder.save();
@@ -186,7 +236,8 @@ exports.checkout = async (req, res, next) => {
     );
 
     if (supplierResponse.status !== 201) {
-      next(createHttpError(500, "Failed placing order at supplier"));
+      // next(createHttpError(500, "Failed placing order at supplier"));
+      console.log("Failed placing order at supplier");
     }
   } catch (err) {
     if (!err.statusCode) {
@@ -225,27 +276,6 @@ exports.confirmDeliver = async (req, res, next) => {
 };
 
 exports.getProducts = async (req, res, next) => {
-  const products = [
-    {
-      id: 1,
-      image: "tea_pot",
-      name: "Tea Pot",
-      price: 50,
-    },
-    {
-      id: 2,
-      image: "mug",
-      name: "Mug",
-      price: 20,
-    },
-    {
-      id: 3,
-      image: "water_bottle",
-      name: "Water Bottle",
-      price: 30,
-    },
-  ];
-
   try {
     res.status(200).json({
       products: products,
