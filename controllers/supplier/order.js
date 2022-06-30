@@ -10,9 +10,10 @@ exports.putOrder = async (req, res, next) => {
     const response = await axios.get(
       process.env.BANKAPIENDPOINT + "/transaction/" + transactionId
     );
+    console.log(response);
     if (response.status !== 200) {
       return next(
-        createHttpError(500, "Transaction not found with give transactionId")
+        createHttpError(500, "Transaction not found with given transactionId")
       );
     }
     // create order
@@ -33,6 +34,7 @@ exports.putOrder = async (req, res, next) => {
         transactionId: order.transactionId,
       }
     );
+    console.log(orderConfirmResponse);
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;

@@ -4,6 +4,7 @@ const {
   getCart,
   checkout,
   confirmDeliver,
+  getProducts,
 } = require("../../controllers/ecom/shop");
 const isAuth = require("../../middlewares/auth/isAuth");
 
@@ -17,5 +18,7 @@ router.get("/cart", isAuth, getCart);
 router.put("/checkout", isAuth, checkout);
 // POST -> /ecom/api/shop/order
 router.post("/order", confirmDeliver);
+//GET -> /ecom/api/shop/products
+router.get("/products", getProducts)
 
 module.exports = router;

@@ -14,7 +14,7 @@ exports.postBankInfo = async (req, res, next) => {
     user.bankAccountNo = bankAccountNo;
     user.bankAccountName = bankAccountName;
     user.bankAccountToken = bankAccountToken;
-
+    console.log(bankAccountToken);
     await user.save();
 
     const response = await axios.post(

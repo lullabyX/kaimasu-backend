@@ -25,7 +25,7 @@ exports.putTransaction = async (req, res, next) => {
     }
 
     const totalAmount = products.reduce((total, currVal) => {
-      return total + +currVal.price * +currVal.quantity;
+      return total + +currVal.price * +currVal?.quantity;
     }, 0);
 
     const transaction = new Transaction({
