@@ -40,7 +40,7 @@ const authController = require("../../controllers/ecom/auth");
  *       example:
  *         username: lullabyXR
  *         email: hassan_rabbi@live.com
- *         password: qwerty12345
+ *         password: qwerty1234
  */
 
 /**
