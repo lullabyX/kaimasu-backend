@@ -5,6 +5,8 @@ const Cart = require("../../models/ecom/Cart");
 const User = require("../../models/ecom/Users");
 const Order = require("../../models/ecom/Order");
 const SupplierOrderEcom = require("../../models/ecom/SupplierOrder");
+const Transaction = require("../../models/bank/Transactions");
+const BankUser = require("../../models/bank/BankUser");
 
 require("dotenv").config();
 
@@ -280,6 +282,51 @@ exports.getProducts = async (req, res, next) => {
     res.status(200).json({
       products: products,
     });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.getTransactionChain = async (req, res, next) => {
+  const userTransactionId = req.query.transactionId;
+  // console.log(userTransactionId);
+  try {
+    const userOrder = await Order.findOne({
+      transactionId: mongoose.Types.ObjectId(userTransactionId),
+    });
+    if (!userOrder) {
+      const error = new Error(
+        "User order not found associated with given transactionId"
+      );
+      throw error;
+    }
+
+    const supplierOrderFromEcom = await SupplierOrderEcom.findOne({
+      userOrderId: mongoose.Types.ObjectId(userOrder._id),
+    });
+    const transactionToSupplier = await Transaction.findById(
+      supplierOrderFromEcom.transactionId
+    );
+    const transactionToUser = await Transaction.findById(
+      userOrder.transactionId
+    );
+
+    const bankUser = await BankUser.findById(transactionToUser.from);
+    const bankEcom = await BankUser.findById(transactionToUser.to);
+    const bankSupplier = await BankUser.findById(transactionToSupplier.to);
+
+    res.status(200).json({
+      message: "transaction histroy fetched",
+      userOrderTransaction: transactionToUser._doc,
+      ecomOrderToSupplierTransaction: transactionToSupplier._doc,
+      bankUser: bankUser._doc,
+      bankEcom: bankEcom._doc,
+      bankSupplier: bankSupplier._doc,
+    });
+    
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;

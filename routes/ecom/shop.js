@@ -5,6 +5,7 @@ const {
   checkout,
   confirmDeliver,
   getProducts,
+  getTransactionChain,
 } = require("../../controllers/ecom/shop");
 const isAuth = require("../../middlewares/auth/isAuth");
 
@@ -146,7 +147,7 @@ router.put("/checkout", isAuth, checkout);
 // POST -> /ecom/api/shop/order
 router.post("/order", confirmDeliver);
 //GET -> /ecom/api/shop/products
-router.get("/products", getProducts)
+router.get("/products", getProducts);
 
 /**
  * @swagger
@@ -166,5 +167,8 @@ router.get("/products", getProducts)
  */
 // GET -> /ecom/api/shop/products
 router.get("/products", getProducts);
+
+// GET -> /ecom/api/shop/transaction-chain?transactionId=6308a2c579e6728632c512bc
+router.get("/transaction-chain", isAuth, getTransactionChain);
 
 module.exports = router;
