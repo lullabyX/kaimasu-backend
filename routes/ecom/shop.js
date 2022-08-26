@@ -148,6 +148,22 @@ router.post("/order", confirmDeliver);
 //GET -> /ecom/api/shop/products
 router.get("/products", getProducts)
 
+/**
+ * @swagger
+ * /ecom/api/shop/products:
+ *   get:
+ *     summary: Returns the list of all the books
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: Get Products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
+ */
 // GET -> /ecom/api/shop/products
 router.get("/products", getProducts);
 
