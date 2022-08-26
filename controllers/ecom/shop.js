@@ -7,35 +7,36 @@ const Order = require("../../models/ecom/Order");
 const SupplierOrderEcom = require("../../models/ecom/SupplierOrder");
 const Transaction = require("../../models/bank/Transactions");
 const BankUser = require("../../models/bank/BankUser");
+const Products = require("../../models/supplier/Products");
 
 require("dotenv").config();
 
-let products = [
-  {
-    id: 1,
-    image:
-      "https://res.cloudinary.com/dxaiffb1m/image/upload/v1656585653/Taza-creativa-de-cer-mica-Simple-de-gran-capacidad-para-parejas-de-estilo-japon-s-taza_ou5uwi.jpg",
-    name: "Coffee Mug",
-    quantity: 30,
-    price: 50,
-  },
-  {
-    id: 2,
-    image:
-      "https://res.cloudinary.com/dxaiffb1m/image/upload/v1656586131/5950b2c6186770978ab0607bd33a5c10_jvhm0o.jpg",
-    name: "Tea Cup",
-    quantity: 40,
-    price: 20,
-  },
-  {
-    id: 3,
-    image:
-      "https://res.cloudinary.com/dxaiffb1m/image/upload/v1656586180/81lMl0KeaXL._AC_SL1500__terpfi.jpg",
-    name: "Water Bottle",
-    quantity: 50,
-    price: 30,
-  },
-];
+// let products = [
+//   {
+//     id: 1,
+//     image:
+//       "https://res.cloudinary.com/dxaiffb1m/image/upload/v1656585653/Taza-creativa-de-cer-mica-Simple-de-gran-capacidad-para-parejas-de-estilo-japon-s-taza_ou5uwi.jpg",
+//     name: "Coffee Mug",
+//     quantity: 30,
+//     price: 50,
+//   },
+//   {
+//     id: 2,
+//     image:
+//       "https://res.cloudinary.com/dxaiffb1m/image/upload/v1656586131/5950b2c6186770978ab0607bd33a5c10_jvhm0o.jpg",
+//     name: "Tea Cup",
+//     quantity: 40,
+//     price: 20,
+//   },
+//   {
+//     id: 3,
+//     image:
+//       "https://res.cloudinary.com/dxaiffb1m/image/upload/v1656586180/81lMl0KeaXL._AC_SL1500__terpfi.jpg",
+//     name: "Water Bottle",
+//     quantity: 50,
+//     price: 30,
+//   },
+// ];
 
 exports.getCart = async (req, res, next) => {
   try {
@@ -81,6 +82,7 @@ exports.postCart = async (req, res, next) => {
       productQuantity = +productQuantity + oldQty;
     }
 
+    const products = await Products.find();
     const product = products.filter((product) => product.id == productId)[0];
     if (!product) {
       const error = new Error("Product not found in product list");
@@ -216,17 +218,17 @@ exports.checkout = async (req, res, next) => {
       transactionId: bankResSupplier.data.transactionId,
     });
 
-    products = products.map((product) => {
+    const products = await Products.find();
+
+    for (let i = 0; i < products.length; i++) {
       const orderProduct = orderProducts.filter(
-        (orderProduct) => orderProduct.productId == product.id
+        (orderProduct) => orderProduct.productId == products[i].id
       )[0];
-      let newQty = product.quantity;
+      let newQty = products[i].quantity;
       if (orderProduct) newQty -= orderProduct.quantity;
-      return {
-        ...product,
-        quantity: newQty,
-      };
-    });
+      products[i].quantity = newQty;
+      await products[i].save();
+    }
 
     await supplierOrder.save();
 
@@ -278,6 +280,7 @@ exports.confirmDeliver = async (req, res, next) => {
 };
 
 exports.getProducts = async (req, res, next) => {
+  const products = await Products.find();
   try {
     res.status(200).json({
       products: products,
@@ -326,7 +329,6 @@ exports.getTransactionChain = async (req, res, next) => {
       bankEcom: bankEcom._doc,
       bankSupplier: bankSupplier._doc,
     });
-    
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
