@@ -145,6 +145,8 @@ router.put("/checkout", isAuth, checkout);
  */
 // POST -> /ecom/api/shop/order
 router.post("/order", confirmDeliver);
+//GET -> /ecom/api/shop/products
+router.get("/products", getProducts)
 
 /**
  * @swagger
