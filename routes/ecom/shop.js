@@ -55,6 +55,54 @@ const router = Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Address:
+ *       type: object
+ *       required:
+ *         - FullName
+ *         - Region
+ *         - City
+ *         - Area
+ *         - Address
+ *         - PhoneNumber
+ *       properties:
+ *         FullName:
+ *          type: string
+ *          description: Customer FullName
+ *         Region:
+ *           type: string
+ *           description: Region
+ *         City:
+ *          type: string
+ *          description: City
+ *         Area:
+ *          type: string
+ *          description: Area
+ *         Address:
+ *          type: String
+ *          description: Address
+ *         PhoneNumber:
+ *          type: string
+ *          description: PhoneNumber
+ *       example:
+ *         FullName : Mahmudul Hassan Rabbi
+ *         Region : Bangladesh
+ *         City : Sylhet
+ *         Area : Akhaliya
+ *         Address : 4/B Madani Comples, SUST gate
+ *         PhoneNumber": 01234567899
+ */
+
+/**
+ * @swagger
+ * tags:
+ *   name: Checkout
+ *   description: Checkout
+ */
+
+/**
+ * @swagger
  * /ecom/api/shop/update-cart:
  *   post:
  *     summary: Add product to cart
@@ -102,20 +150,20 @@ router.get("/cart", isAuth, getCart);
  * /ecom/api/shop/checkout:
  *   put:
  *     summary: User checkout
- *     tags: [Products]
+ *     tags: [Checkout]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             $ref: '#/components/schemas/Address'
  *     responses:
  *       200:
  *         description: User checked out
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Product'
+ *               $ref: '#/components/schemas/Address'
  *       500:
  *         description: Some server error
  */
@@ -147,7 +195,7 @@ router.put("/checkout", isAuth, checkout);
 // POST -> /ecom/api/shop/order
 router.post("/order", confirmDeliver);
 //GET -> /ecom/api/shop/products
-router.get("/products", getProducts);
+// router.get("/products", getProducts);
 
 /**
  * @swagger

@@ -58,6 +58,7 @@ exports.getCart = async (req, res, next) => {
 
 exports.postCart = async (req, res, next) => {
   const productId = req.body.productId || "";
+  console.log({productId})
   let productQuantity = req.body.productQuantity || 1;
   try {
     let cart = await Cart.findOne({
